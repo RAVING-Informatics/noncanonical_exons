@@ -9,7 +9,7 @@ wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_39/gencod
 ```
 ## Extract out non-canonical exons from annotation file
 - Canonical transcript = MANE transcript
-- See script `extract_noncanonical_exons.sh`
+- See script `union_pext.sh`
 
 ## Obtain `pext` scores from gnomAD
 - Exon/feasture-level pext scores as BigWig files downloadable from UCSC server:
