@@ -34,5 +34,5 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 
 ## Filter the `pext` scores to find exons expressed in tissue of interest
 - The filter strategy used is specific to the tissue of interest.
-- The `filter.sh` script filters for exons expressed in muscle (pext_muscle > 0.05) and not expressed in at least half of the other tissues (pext < 0.05).
-- The results is `ext_noncanonical_exons_muscle_gt005_half_others_lt005.bed`
+- The `filter_pext.sh` script filters for exons expressed in muscle (pext_muscle > 0.05) and not expressed in at least half of the other tissues (pext < 0.05).
+- The results is `pext_noncanonical_exons_muscle_0.5.bed`
