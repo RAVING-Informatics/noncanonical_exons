@@ -33,6 +33,13 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 - The final output file `pext_with_noncanonical_exon_annot.bed` contains the original pext bin, followed by the exon coordinates, the overlap type and the pext score for all 50 tissues.
 - See script: `intersect_exons_pext.sh`
 
+**RESULTS**
+- Total number of non-canonical exons:
+  - v39: 17,056
+  - v49: 10,910 
+- Number of exons with pext==0 in ALL tissues:
+  - v39: 1447
+  - v49: 1348
 ## Filter the `pext` scores to find exons expressed in tissue of interest
 - The filter strategy used is specific to the tissue of interest.
 - The `filter_pext.sh` script filters for exons expressed in muscle (pext_muscle > 0.05) and not expressed in at least half of the other tissues (pext < 0.05).
