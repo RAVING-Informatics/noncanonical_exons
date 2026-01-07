@@ -6,6 +6,7 @@ Identify exons expressed in non-canonical transcript isoforms that demonstrate t
 - gnomAD v4 uses v39, as per [this help page](https://gnomad.broadinstitute.org/help/vep)
 ```
 wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_39/gencode.v39.annotation.gtf.gz
+wget https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_49/gencode.v49.annotation.gtf.gz
 ```
 ## Extract out non-canonical exons from annotation file
 - Canonical transcript = MANE transcript
