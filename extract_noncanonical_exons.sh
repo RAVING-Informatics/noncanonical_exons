@@ -1,11 +1,12 @@
-gtf=gencode.v39.annotation.gtf.gz
+version=v49
+gtf=gencode.${version}.annotation.gtf.gz
 
 # MANE Select transcripts
 zcat $gtf \
 | awk -F'\t' '$3=="transcript" && $9 ~ /tag "MANE_Select"/ {
     match($9,/transcript_id "([^"]+)"/,a);
     if (a[1]!="") print a[1]
-}' | sort -u > mane_select.txids.txt
+}' | sort -u > mane_select.${version}.txids.txt
 
 zcat $gtf \
 | awk -F'\t' '$3=="exon" {
@@ -17,27 +18,27 @@ zcat $gtf \
         printf("%s\t%d\t%s\t%s\t%s\t%s\n",
                $1,$4-1,$5,(gene?gene:"."),(tx?tx:"."),(exon_num?exon_num:"."))
     }
-}' | sort -k1,1 -k2,2n -k3,3n > all.exons.bed
+}' | sort -k1,1 -k2,2n -k3,3n > ./bed/all.exons.${version}.bed
 
 # canonical exons
-awk 'NR==FNR{canon[$1]=1; next} canon[$5]' mane_select.txids.txt all.exons.bed \
-  > canonical.exons.bed
+awk 'NR==FNR{canon[$1]=1; next} canon[$5]' mane_select.${version}.txids.txt ./bed/all.exons.${version}.bed \
+  > ./bed/canonical.exons.${version}.bed
 
 # non-canonical exons
-awk 'NR==FNR{canon[$1]=1; next} !canon[$5]' mane_select.txids.txt all.exons.bed \
-  > noncanonical.exons.bed
+awk 'NR==FNR{canon[$1]=1; next} !canon[$5]' mane_select.${version}.txids.txt ./bed/all.exons.${version}.bed \
+  > ./bed/noncanonical.exons.${version}.bed
 
 # Merge canonical exons (carry gene name)
-bedtools sort -i canonical.exons.bed \
+bedtools sort -i ./bed/canonical.exons.${version}.bed \
 | bedtools merge -i - -c 4 -o distinct \
-> canonical.exons.merged.bed
+> ./bed/canonical.exons.merged.${version}.bed
 
 # Merge non-canonical exons
-bedtools sort -i noncanonical.exons.bed \
+bedtools sort -i ./bed/noncanonical.exons.${version}.bed \
 | bedtools merge -i - -c 4 -o distinct \
-> noncanonical.exons.merged.bed
+> ./bed/noncanonical.exons.merged.${version}.bed
 
 # Unique-to-noncanonical: subtract any overlap with canonical
 # -A removes any interval in A that has *any* overlap with B
-bedtools subtract -a noncanonical.exons.merged.bed -b canonical.exons.merged.bed -A \
-> noncanonical.unique_exons.bed
+bedtools subtract -a ./bed/noncanonical.exons.merged.${version}.bed -b ./bed/canonical.exons.merged.${version}.bed -A \
+> ./bed/noncanonical.unique_exons.${version}.bed
