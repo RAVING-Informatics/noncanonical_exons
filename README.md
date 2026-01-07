@@ -56,4 +56,10 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
   - v49: 1348
 - Number of exons with pext>0.1 and flagged in muscle
   - v39: 390
-  - v49: 294 
+  - v49: 294
+
+| Metric | v39 | v49 |
+|---|---|---|
+| Total number of non-canonical exons | 17,056 | 10,910 |
+| Number of exons with `pext==0` in ALL tissues | 1447 | 1348 |
+| Number of exons with `pext>0.1` and flagged in muscle | 390 | 294 |
