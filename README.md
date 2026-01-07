@@ -53,9 +53,9 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 |---|---|---|
 | Total number of non-canonical exons | 17,056 | 10,910 |
 | Number of exons with `pext==0` in ALL tissues | 1447 | 1348 |
-| Number of exons with `pext>0.1` and flagged in $\ge$ tissue (all)| 4150 | 2661 |
-| Number of exons with `pext>0.1` and flagged in $\ge$ tissue (collapsed)| 2826 | 2366 |
+| Number of exons with `pext>0.1` and flagged in $\ge$1 tissue (all)| 4150 | 2661 |
+| Number of exons with `pext>0.1` and flagged in $\ge$1 tissue (collapsed)| 2826 | 2366 |
 | Number of exons with `pext>0.1` and flagged in muscle | 390 | 294 |
 | Number of exons with `pext>0.1` and flagged in nerve | 29 | 22 |
-| Number of exons with `pext>0.1` and flagged in brain | 506 | 370 |
+| Number of exons with `pext>0.1` and flagged in $\ge$1 brain tissue | 506 | 370 |
 
