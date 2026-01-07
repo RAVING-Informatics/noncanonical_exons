@@ -48,15 +48,6 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 - The results is `pext_noncanonical_exons_muscle_0.5.bed`
 
 # RESULTS
-- Total number of non-canonical exons:
-  - v39: 17,056
-  - v49: 10,910 
-- Number of exons with pext==0 in ALL tissues:
-  - v39: 1447
-  - v49: 1348
-- Number of exons with pext>0.1 and flagged in muscle
-  - v39: 390
-  - v49: 294
 
 | Metric | v39 | v49 |
 |---|---|---|
