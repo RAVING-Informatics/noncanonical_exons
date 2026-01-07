@@ -1,30 +1,32 @@
+version=v39
+
 # remove header
-tail -n +2 ./bed/pext_union_named.bedgraph > ./bed/pext_union_named.nohdr.bedgraph
+tail -n +2 ./bedgraph/pext_union_named.bedgraph > ./bedgraph/pext_union_named.nohdr.bedgraph
 
 # sort
-bedtools sort -i ./bed/pext_union_named.nohdr.bedgraph \
-  > ./bed/pext_union_named.sorted.bedgraph
+bedtools sort -i ./bedgraph/pext_union_named.nohdr.bedgraph \
+  > ./bedgraph/pext_union_named.sorted.bedgraph
 
-bedtools sort -i ./noncanonical.unique_exons.bed \
-  > ./noncanonical.unique_exons.sorted.bed
+bedtools sort -i ./bed/noncanonical.unique_exons.${version}.bed \
+  > ./bed/noncanonical.unique_exons.sorted.${version}.bed
 
 # >>> FIXED LINE HERE <<<
-BG_HDR=$(head -n1 ./bed/pext_union_named.bedgraph)
+BG_HDR=$(head -n1 ./bedgraph/pext_union_named.bedgraph)
 
 # Names of pext columns = fields 4..end of header
 PEXT_NAMES=$(echo "$BG_HDR" | cut -f4-)
 
 # New header: core coords + exon annotation + overlap_type + pext columns
 echo -e "chrom\tstart\tend\texon_chr\texon_start\texon_end\texon_gene\toverlap_type\t${PEXT_NAMES}" \
-  > pext_with_noncanonical_exon_annot.reordered.bed
+  > ./bed/pext_with_noncanonical_exon_annot.reordered.${version}.bed
 
 # Number of columns in the ORIGINAL pext bedgraph (using its header)
 BG_NCOLS=$(echo "$BG_HDR" | awk -F'\t' '{print NF}')
 
 EXON_COLS=4   # chr, start, end, gene
 
-bedtools intersect -a ./bed/pext_union_named.sorted.bedgraph \
-                   -b noncanonical.unique_exons.sorted.bed \
+bedtools intersect -a ./bedgraph/pext_union_named.sorted.bedgraph \
+                   -b ./bed/noncanonical.unique_exons.sorted.${version}.bed \
                    -wa -wb \
 | awk -v bgcols="$BG_NCOLS" -v ecol="$EXON_COLS" -v OFS="\t" '
 {
@@ -61,4 +63,4 @@ bedtools intersect -a ./bed/pext_union_named.sorted.bedgraph \
 
     printf "\n"
 }
-' >> pext_with_noncanonical_exon_annot.bed
+' >> ./bed/pext_with_noncanonical_exon_annot.reordered.${version}.bed
