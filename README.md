@@ -30,17 +30,30 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 ## Intersect the noncanonical exons with the file containing the merged pext scores
 - Use the bed file containing the noncanonical exons (`noncanonical.unique_exons.bed`) to filter the merged pext score file (`pext_union_named.bedgraph`) and obtain only the pext scores for bins overlapping non-canonical exons.
 - Note, if a `pext` bin is not fully contained within an exon boundary defined in `noncanonical.unique_exons.bed` (i.e. sticks out), then this is annotated in the final output in the column `overlap_type` as `partial`.
-- The final output file `pext_with_noncanonical_exon_annot.bed` contains the original pext bin, followed by the exon coordinates, the overlap type and the pext score for all 50 tissues.
+- The final output file `pext_with_noncanonical_exon_annot.reordered.bed` contains the original pext bin, followed by the exon coordinates, the overlap type and the pext score for all 50 tissues.
 - See script: `intersect_exons_pext.sh`
 
-**RESULTS**
+## FILTER METHOD (Laura Covill)
+- The R script `pext_score_distribution.r` takes the `pext_with_noncanonical_exon_annot.reordered.bed` file as input and calculates:
+  - Per-exon distribution stats across tissues;
+  - Which tissues exceed a z-score threshold, for each exon;
+  - `pext` outliers in specific tissues (e.g. `Muscle_Skeletal`)
+- The script writes all outputs to TSV
+- The z-score threshold is set at 3 but can be modified using `z_thr`
+- The pext cut-off is 0.1 as per this [paper](url) 
+
+## OLD FILTERING METHOD: Filter the `pext` scores to find exons expressed in tissue of interest
+- The filter strategy used is specific to the tissue of interest.
+- The `filter_pext.sh` script filters for exons expressed in muscle (pext_muscle > 0.05) and not expressed in at least half of the other tissues (pext < 0.05).
+- The results is `pext_noncanonical_exons_muscle_0.5.bed`
+
+# RESULTS
 - Total number of non-canonical exons:
   - v39: 17,056
   - v49: 10,910 
 - Number of exons with pext==0 in ALL tissues:
   - v39: 1447
   - v49: 1348
-## Filter the `pext` scores to find exons expressed in tissue of interest
-- The filter strategy used is specific to the tissue of interest.
-- The `filter_pext.sh` script filters for exons expressed in muscle (pext_muscle > 0.05) and not expressed in at least half of the other tissues (pext < 0.05).
-- The results is `pext_noncanonical_exons_muscle_0.5.bed`
+- Number of exons with pext>0.1 and flagged in muscle
+  - v39: 390
+  - v49: 294 
