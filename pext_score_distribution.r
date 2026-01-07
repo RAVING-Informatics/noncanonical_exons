@@ -11,7 +11,7 @@ suppressPackageStartupMessages({
 })
 
 # -------------------------- CONFIG --------------------------
-in_tsv  <- "./pext_with_noncanonical_exon_annot.reordered.v39.bed"      # input file
+in_tsv  <- "./pext_with_noncanonical_exon_annot.reordered.v49.bed"      # input file
 out_dir <- "pext_zscores_out"    # output folder
 z_thr   <- 3                     # z-score threshold
 mode    <- "high"                # "high" (z >= thr) or "abs" (|z| >= thr)
@@ -121,37 +121,79 @@ exon_summary <- long %>%
 
 # ---- Filter for specific tissue outliers (Muscle) ----
 
+safe_max <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0) NA_real_ else max(x)
+}
+
+collapse_same_except_id <- function(x, exon_id_cols) {
+  x %>%
+    dplyr::distinct(dplyr::across(-dplyr::all_of(exon_id_cols)), .keep_all = TRUE)
+}
+
 get_tissue_exon_outliers <- function(
     exon_summary,
     long,
-    tissue,
+    tissue_pattern,
     exon_id_cols,
     min_pext = 0,
-    min_z = NULL
+    min_z = NULL,
+    match = c("glob", "regex"),
+    collapse_dupes = TRUE
 ) {
+  match <- match.arg(match)
+  
+  # ---- helper: safe max (avoids -Inf warnings) ----
+  safe_max <- function(x) {
+    x <- x[!is.na(x)]
+    if (length(x) == 0) NA_real_ else max(x)
+  }
+  
+  
+  # ---- optionally collapse duplicates ----
+  if (collapse_dupes) {
+    long <- collapse_same_except_id(long, exon_id_cols)
+  }
+  
+  # ---- tissue pattern matching ----
+  tissue_regex <- if (match == "glob") {
+    paste0("^", gsub("\\*", ".*", tissue_pattern), "$")
+  } else {
+    tissue_pattern
+  }
+  
   tissue_tbl <- long %>%
-    filter(tissue == !!tissue) %>%
-    group_by(across(all_of(exon_id_cols))) %>%
-    summarise(
-      pext_tissue = first(pext),
-      tissue_z    = first(z),
-      tissue_flagged = any(flagged %in% TRUE),
+    dplyr::filter(grepl(tissue_regex, tissue)) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(exon_id_cols))) %>%
+    dplyr::summarise(
+      pext_tissue     = safe_max(pext),
+      tissue_z        = safe_max(z),
+      tissue_flagged  = any(flagged %in% TRUE),
+      tissues_matched = paste(unique(tissue), collapse = ","),
       .groups = "drop"
     )
   
-  out <- exon_summary %>%
-    inner_join(
+  exon_summary %>%
+    dplyr::inner_join(
       tissue_tbl %>%
-        filter(
+        dplyr::filter(
           tissue_flagged,
           pext_tissue > min_pext,
-          if (!is.null(min_z)) tissue_z >= min_z else TRUE
+          if (!is.null(min_z)) (!is.na(tissue_z) & tissue_z >= min_z) else TRUE
         ),
       by = exon_id_cols
     )
-  
-  out
 }
+
+brain_exon_outliers <- get_tissue_exon_outliers(
+  exon_summary = exon_summary,
+  long         = long,
+  tissue       = "Brain_*",
+  exon_id_cols = exon_id_cols,
+  min_pext     = 0.1,
+  min_z        = z_thr,
+  collapse_dupes = FALSE
+)
 
 muscle_exon_outliers <- get_tissue_exon_outliers(
   exon_summary = exon_summary,
@@ -159,14 +201,68 @@ muscle_exon_outliers <- get_tissue_exon_outliers(
   tissue       = "Muscle_Skeletal",
   exon_id_cols = exon_id_cols,
   min_pext     = 0.1,
-  min_z        = z_thr
+  min_z        = z_thr,
+  collapse_dupes = FALSE
+)
+
+nerve_exon_outliers <- get_tissue_exon_outliers(
+  exon_summary = exon_summary,
+  long         = long,
+  tissue       = "Nerve_Tibial",
+  exon_id_cols = exon_id_cols,
+  min_pext     = 0.1,
+  min_z        = z_thr,
+  collapse_dupes = FALSE
+)
+
+get_any_tissue_exon_outliers <- function(
+    exon_summary,
+    long,
+    exon_id_cols,
+    min_pext = 0,
+    min_z = NULL,
+    collapse_dupes = TRUE
+) {
+  if (collapse_dupes) {
+    long <- collapse_same_except_id(long, exon_id_cols)
+  }
+  
+  hits <- long %>%
+    dplyr::filter(
+      flagged %in% TRUE,
+      pext > min_pext,
+      if (!is.null(min_z)) z >= min_z else TRUE
+    ) %>%
+    dplyr::group_by(dplyr::across(dplyr::all_of(exon_id_cols))) %>%
+    dplyr::summarise(
+      n_flagged = dplyr::n(),
+      flagged_tissues = paste(tissue, collapse = ","),
+      top3_tissues_by_z = paste(tissue[order(z, decreasing = TRUE)][1:min(3, dplyr::n())], collapse = ","),
+      top3_z = paste(round(sort(z, decreasing = TRUE)[1:min(3, dplyr::n())], 3), collapse = ","),
+      .groups = "drop"
+    )
+  
+  exon_summary %>%
+    dplyr::inner_join(hits, by = exon_id_cols)
+}
+
+any_outliers <- get_any_tissue_exon_outliers(
+  exon_summary = exon_summary,
+  long = long,
+  exon_id_cols = exon_id_cols,
+  min_pext = 0.1,
+  min_z = z_thr,
+  collapse_dupes = FALSE
 )
 
 # -------------------------- SAVE OUTPUTS --------------------------
-write_tsv(long, file.path(out_dir, "pext_long_with_zscores_v39.tsv"))
-write_tsv(exon_summary, file.path(out_dir, "exon_pext_zscore_summary_v39.tsv"))
-write_tsv(muscle_exon_outliers, file.path(out_dir, "muscle_exon_outliers_v39.tsv"))
+write_tsv(long, file.path(out_dir, "pext_long_with_zscores_v49.tsv"))
+write_tsv(exon_summary, file.path(out_dir, "exon_pext_zscore_summary_v49.tsv"))
+write_tsv(muscle_exon_outliers, file.path(out_dir, "muscle_exon_outliers_v49.tsv"))
+write_tsv(nerve_exon_outliers, file.path(out_dir, "nerve_exon_outliers_v49.tsv"))
+write_tsv(brain_exon_outliers, file.path(out_dir, "brain_exon_outliers_v49.tsv"))
+write_tsv(any_outliers, file.path(out_dir, "any_exon_outliers_v49.tsv"))
 
 # Also save only the (exon,tissue) rows that meet the threshold
 hits <- long %>% filter(flagged %in% TRUE)
-write_tsv(hits, file.path(out_dir, sprintf("exon_tissue_hits_z%s_%s_v39.tsv", z_thr, mode)))
+write_tsv(hits, file.path(out_dir, sprintf("exon_tissue_hits_z%s_%s_v49.tsv", z_thr, mode)))
