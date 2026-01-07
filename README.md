@@ -37,10 +37,15 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 - The R script `pext_score_distribution.r` takes the `pext_with_noncanonical_exon_annot.reordered.bed` file as input and calculates:
   - Per-exon distribution stats across tissues;
   - Which tissues exceed a z-score threshold, for each exon;
-  - `pext` outliers in specific tissues (e.g. `Muscle_Skeletal`)
-- The script writes all outputs to TSV
-- The z-score threshold is set at 3 but can be modified using `z_thr`
-- The pext cut-off is 0.1 as per this [paper](url) 
+  -  `pext` values are outliers in specific tissues (e.g. `Muscle_Skeletal`)
+- The following parameters can be set:
+  - The z-score threshold is set at 3 but can be modified using `z_thr`
+  - The pext cut-off is 0.1 as per this [paper](url)
+  - There is also an option when generating the result tables to collapse entries describing the same exon region (although with mildly varying exon boundaries) with the same results (i.e. same pext, z-score, flagged tissues etc).
+- The script writes all outputs to TSV, including:
+  - A long format table of exon x tissue pext scores
+  - A table containing summary statistics for all exons, including pext scores (i.e. the min, max, mean), top z scores, top 3 flagged tissues etc.
+  - Tables of exons flagged in at least one tissue (or a specific tissue) and above a certain pext threshold. 
 
 ## OLD FILTERING METHOD: Filter the `pext` scores to find exons expressed in tissue of interest
 - The filter strategy used is specific to the tissue of interest.
