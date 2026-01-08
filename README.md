@@ -40,7 +40,7 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
   -  `pext` values are outliers in specific tissues (e.g. `Muscle_Skeletal`)
 - The following parameters can be set:
   - The z-score threshold is set at 3 but can be modified using `z_thr`
-  - The pext cut-off is 0.1 as per this [paper](url)
+  - The pext cut-off is 0.1 as per this [paper](https://www.nature.com/articles/s41586-020-2329-2)
   - There is also an option when generating the result tables to collapse entries describing the same exon region (although with mildly varying exon boundaries) with the same results (i.e. same pext, z-score, flagged tissues etc).
 - The script writes all outputs to TSV, including:
   - A long format table of exon x tissue pext scores
