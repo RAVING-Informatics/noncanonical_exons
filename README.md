@@ -63,4 +63,5 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 | Number of exons with `pext>0.1` and flagged in muscle | 390 | 294 |
 | Number of exons with `pext>0.1` and flagged in nerve | 29 | 22 |
 | Number of exons with `pext>0.1` and flagged in $\ge$ 1 brain tissue | 506 | 370 |
+| Number of exons in constrained genes (LOEUF < 0.33) with `pext>0.1` and flagged in $\ge$ 1 tissue  | 692 | 543 |
 
