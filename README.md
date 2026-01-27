@@ -52,6 +52,12 @@ wget https://storage.googleapis.com/gcp-public-data--gnomad/release/4.1/pext/gno
 - The `filter_pext.sh` script filters for exons expressed in muscle (pext_muscle > 0.05) and not expressed in at least half of the other tissues (pext < 0.05).
 - The results is `pext_noncanonical_exons_muscle_0.5.bed`
 
+## LOF Constraint
+As per this blog post, [gnomAD v4.0 Gene Constraint | gnomAD browser](https://gnomad.broadinstitute.org/news/2024-03-gnomad-v4-0-gene-constraint/), the v2.1.1 dataset is currently more robust. The constraint metrics displayed in v4.1 are based on more data, but are still underdeveloped. The constraint values (LOEUF), can be sourced from the 'supplementary_dataset_11_full_constraint_metrics` ([Supplemental Data Table 11](https://www.nature.com/articles/s41586-020-2308-7#Sec12)) in Karczewski _et al._ 2020. 
+- Filter the table to include only scores corresponding to canonical exons (`canonical == TRUE`).
+- The column `oe_lof_upper` containns the LOEUF scores for filtering.
+- Using this filterd table `loeuf_constraint_canonical.tsv`, the code in `pext_score_distribution.r` will calculate the number of exons in constrained genes (LOEUF < 0.33) with `pext>0.1` and flagged in $\ge$ 1 tissue
+
 # RESULTS
 
 | Metric | v39 | v49 |
